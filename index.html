@@ -6682,7 +6682,7 @@ zeal@(n.4)熱心;熱誠
     // --- PARSING LOGIC ---
     let appData = [];
     
-    function parseData() {
+   function parseData() {
         const lines = rawDataString.split('\n');
         appData = [];
         lines.forEach(line => {
@@ -6690,32 +6690,21 @@ zeal@(n.4)熱心;熱誠
             // Skip comments or empty lines
             if (!line || line.startsWith('//')) return;
 
+            // Remove wrapping quotes if present
             if (line.startsWith('"') && line.endsWith('"')) {
                 line = line.slice(1, -1);
             }
             
-            // Regex handles: "word" @ "length" "rest"
-            const match = line.match(/^(.+?)@(\d+)(.+)$/);
+            // UPDATED REGEX: Matches "word" @ "(pos.length)" "definition"
+            // Example: able@(adj.4)能;有能力的
+            const match = line.match(/^(.+?)@\((.+?)\.(\d+)\)(.+)$/);
             
             if (match) {
-                const wordStr = match[1].trim();
-                const lenStr = match[2];
-                let defStr = match[3].trim();
-                let posStr = '';
-
-                // Try to extract Part of Speech from the end, e.g. "..., (n)"
-                const posMatch = defStr.match(/，?\s*\((.+?)\)$/);
-                if (posMatch) {
-                    posStr = posMatch[1]; 
-                    // Remove POS from definition for cleaner game UI
-                    defStr = defStr.replace(/，?\s*\((.+?)\)$/, '').trim();
-                }
-
                 appData.push({
-                    word: wordStr,
-                    pos: posStr,
-                    length: parseInt(lenStr),
-                    def: defStr
+                    word: match[1].trim(),   // Group 1: Word (e.g. "able")
+                    pos: match[2].trim(),    // Group 2: POS (e.g. "adj")
+                    length: parseInt(match[3]), // Group 3: Length (e.g. 4)
+                    def: match[4].trim()     // Group 4: Definition (e.g. "能;有能力的")
                 });
             }
         });
