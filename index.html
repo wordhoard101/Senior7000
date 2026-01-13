@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>High School Vocab Master</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --radius: 12px;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header & Nav */
+        header {
+            background: var(--card);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; color: var(--primary); }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn:active { opacity: 0.7; }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+
+        /* Views */
+        .view {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .view.active { display: block; }
+
+        /* Dashboard */
+        .controls {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            background: #e1e4e8;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 1rem;
+        }
+        .toggle-opt {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .toggle-opt.selected { background: white; color: var(--primary); shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+        .filter-group {
+            margin-bottom: 1rem;
+        }
+        .filter-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+        }
+        .cat-btn {
+            aspect-ratio: 1;
+            background: var(--card);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #eee;
+        }
+        .cat-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        .big-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            background: var(--success);
+        }
+
+        /* Study Mode */
+        .study-list { list-style: none; padding: 0; }
+        .study-item {
+            background: var(--card);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .study-word { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
+        .study-meta { text-align: right; max-width: 65%; }
+        .study-pos { font-size: 0.8rem; color: #888; display: block; margin-bottom: 4px; font-style: italic; }
+        .study-def { color: #444; font-size: 0.95rem; }
+
+        /* Game Mode A: Spelling */
+        .spell-card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .question-text { font-size: 1.2rem; margin-bottom: 1.5rem; color: #444; min-height: 3rem; }
+        .input-group { position: relative; margin-bottom: 1.5rem; }
+        .spell-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            outline: none;
+        }
+        .spell-input.correct { border-color: var(--success); background: #e8f8f5; }
+        .spell-input.wrong { border-color: var(--danger); background: #fdedec; }
+        
+        .hint-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #f1c40f;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        /* Game Mode B: Matching */
+        .match-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding-bottom: 2rem;
+        }
+        .match-card {
+            background: var(--card);
+            padding: 1.5rem 0.5rem;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            font-size: 0.95rem;
+            cursor: pointer;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            word-break: break-word;
+        }
+        .match-card.selected { border-color: var(--primary); background: #eaf2f8; transform: scale(0.98); }
+        .match-card.matched { opacity: 0; pointer-events: none; transform: scale(0.8); transition: opacity 0.5s, transform 0.5s; }
+        .match-card.error { animation: shake 0.4s; border-color: var(--danger); background: #fdedec; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        .stats { font-size: 0.9rem; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="app-title">VocabMaster HS</h1>
+        <button class="btn btn-outline btn-sm" onclick="showStudyMode()">📖 Study</button>
+    </header>
+
+    <div id="view-dashboard" class="view active">
+        <div class="controls">
+            <div class="toggle-group">
+                <div class="toggle-opt selected" onclick="setMode('spell', this)">✍️ Spelling</div>
+                <div class="toggle-opt" onclick="setMode('match', this)">🧩 Matching</div>
+            </div>
+
+            <div class="filter-group">
+                <label>Word Length (Difficulty):</label>
+                <select id="length-filter">
+                    <option value="all">Any Length</option>
+                    <option value="3">3 Letters</option>
+                    <option value="4">4 Letters</option>
+                    <option value="5">5 Letters</option>
+                    <option value="6">6 Letters</option>
+                    <option value="7">7+ Letters</option>
+                </select>
+            </div>
+
+            <button class="btn big-btn" onclick="startRandomGame()">🎲 Test Random 10</button>
+        </div>
+
+        <h3>Browse by Starting Letter</h3>
+        <div class="category-grid" id="category-grid">
+            </div>
+    </div>
+
+    <div id="view-spell" class="view">
+        <div class="stats">
+            <span id="spell-progress">Page 1/5</span>
+            <button class="btn btn-sm" onclick="goHome()">Home</button>
+        </div>
+        <div id="spell-container"></div>
+        <div class="pagination">
+            <button class="btn btn-outline" id="prev-btn" onclick="changePage(-1)">Previous</button>
+            <button class="btn btn-success" id="check-btn" onclick="checkSpelling()">Check Answers</button>
+            <button class="btn btn-outline" id="next-btn" onclick="changePage(1)">Next</button>
+        </div>
+    </div>
+
+    <div id="view-match" class="view">
+        <div class="stats">
+            <span id="match-score">Pairs: 0/5</span>
+            <button class="btn btn-sm" onclick="goHome()">Home</button>
+        </div>
+        <div id="match-area" class="match-grid"></div>
+        <button class="btn big-btn hidden" id="match-next-btn" onclick="startMatchingRound()">Next Round</button>
+    </div>
+
+    <div id="view-study" class="view">
+        <div class="stats">
+            <input type="text" id="study-search" placeholder="Search words..." style="width:70%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+            <button class="btn btn-sm" onclick="goHome()">Close</button>
+        </div>
+        <ul id="study-list" class="study-list"></ul>
+    </div>
+
+<script>
+    // --- DATA INITIALIZATION ---
+    // Format: word@(pos.length)definition
+    // Includes Level 1 vocabulary
+    const rawDataString = `
+able@(adj.4)能;有能力的
+"above@(adj.5)上文的,前述的"
+adult@(adj.5)成年的;成熟的;色情的
+afraid@(adj.6)害怕
+all@(adj.3)所有的;全部
+alone@(adj.5)單獨的;孤單的
+angry@(adj.5)生氣的
+another@(adj.7)另一個
+any@(adj.3)任何的
+back@(adj.4)後面的;拖欠的;過去的
+bad@(adj.3)壞的
+basic@(adj.5)基本的
+beautiful@(adj.9)漂亮的
+best@(adj.4)最好的;最熟練的;最適當的
+better@(adj.6)較佳的;更好的;更適當的
+big@(adj.3)大的
+black@(adj.5)黑色的
+blue@(adj.4)藍色的
+born@(adj.4)出生的;誕生的
+both@(adj.4)兩者
+"bottom@(adj.6)最低的;最後的,最下的"
+brave@(adj.5)勇敢的
+bright@(adj.6)光亮的
+brown@(adj.5)褐色的;棕色的
+busy@(adj.4)忙碌的
+careful@(adj.7)小心的
+certain@(adj.7)肯定的
+chief@(adj.5)為首的;主要的
+clean@(adj.5)乾淨的
+clear@(adj.5)清楚的;晴朗的
+close@(adj.5)近的;密切的
+cold@(adj.4)寒冷的
+common@(adj.6)常見的
+cool@(adj.4)涼快的;很棒的;酷
+correct@(adj.7)正確的
+cute@(adj.4)可愛的
+dark@(adj.4)黑暗的
+dead@(adj.4)死的
+dear@(adj.4)親愛的
+deep@(adj.4)深的
+different@(adj.9)不同的
+difficult@(adj.9)困難的
+direct@(adj.6)直接的
+dirty@(adj.5)骯髒的
+"down@(adj.4)情緒低落,消沈;(分期付款的)第一期的"
+downstairs@(adj.10)樓下的
+dry@(adj.3)乾的
+each@(adj.4)每個
+early@(adj.5)早的;提早的
+east@(adj.4)東方的
+easy@(adj.4)容易的
+eight@(adj.5)八的
+eighteen@(adj.8)十八的
+eighty@(adj.6)八十的
+either@(adj.6)兩者之一
+eleven@(adj.6)十一的
+English@(adj.7)英格蘭的;英國的;英國人的;英語的
+enough@(adj.6)足夠的
+equal@(adj.5)相等的; 平等的
+even@(adj.4)均勻的;偶數的;平手的
+every@(adj.5)每一個的
+false@(adj.5)假的
+far@(adj.3)遠的
+fast@(adj.4)快的
+fat@(adj.3)胖的
+few@(adj.3)少數的;一些
+fifteen@(adj.7)十五的
+fifty@(adj.5)五十的
+final@(adj.5)最終的
+fine@(adj.4)好的
+first@(adj.5)第一的
+five@(adj.4)五的
+"foreign@(adj.7)外國的,陌生的,外來的"
+forty@(adj.5)四十的
+four@(adj.4)四的
+fourteen@(adj.8)十四的
+free@(adj.4)空閒的;自由的;免費的
+fresh@(adj.5)新鮮的
+front@(adj.5)前面的;正面的
+full@(adj.4)飽的;滿的
+funny@(adj.5)可笑的;滑稽的
+general@(adj.7)普遍的
+glad@(adj.4)高興的
+gold@(adj.4)金製的
+good@(adj.4)好的
+grand@(adj.5)雄偉的;總的
+gray@(adj.4)灰色的
+great@(adj.5)很棒;大的
+green@(adj.5)綠色的
+grey@(adj.4)灰色的
+"half@(adj.4)一半的,二分之一的;不完整的"
+happy@(adj.5)快樂的
+hard@(adj.4)硬的;難的
+heavy@(adj.5)重的
+high@(adj.4)高的
+home@(adj.4)家庭的;國內的
+hot@(adj.3)熱的
+huge@(adj.4)巨大的
+human@(adj.5)人類的
+hundred@(adj.7)一百的
+hungry@(adj.6)飢餓的
+important@(adj.9)重要的
+in@(adj.2)在裡面的
+"inside@(adj.6)裡面的,內側的;內幕的"
+iron@(adj.4)鐵的;剛強的;殘酷的
+just@(adj.4)正直的;公平的;應得的;正確的
+"key@(adj.3)重要的,基本的,關鍵的"
+kind@(adj.4)仁慈的
+large@(adj.5)大的
+last@(adj.4)最後的
+late@(adj.4)晚的;遲的
+lazy@(adj.4)懶惰的
+least@(adj.5)最小的;最少的;最不重要的
+left@(adj.4)左邊的
+less@(adj.4)較少的
+"level@(adj.5)水平的,平的;筆直的"
+light@(adj.5)輕的
+likely@(adj.6)有可能的
+little@(adj.6)很少的
+"live@(adj.4)活的,有生命的;燃著的;實況播送的"
+long@(adj.4)長的
+loud@(adj.4)大聲的
+low@(adj.3)低的;矮的
+lucky@(adj.5)幸運的
+mad@(adj.3)發火;發瘋;發狂的
+many@(adj.4)很多的
+mean@(adj.4)兇的;吝嗇的
+middle@(adj.6)中間的
+more@(adj.4)更多的
+most@(adj.4)最多的;大部分的
+much@(adj.4)很多的
+near@(adj.4)近的
+new@(adj.3)新的
+next@(adj.4)下一個
+nice@(adj.4)好的
+nine@(adj.4)九的
+nineteen@(adj.8)十九的
+ninety@(adj.6)九十的
+no@(adj.2)沒有;不
+noisy@(adj.5)喧鬧的
+north@(adj.5)北方的
+O.K.@(adj.4)可以的;不錯的;很好的
+off@(adj.3)離去的;偏離的;休假的;關著的
+OK@(adj.2)好吧
+okay@(adj.4)對;可以;不錯
+old@(adj.3)年老的
+one@(adj.3)一個的
+open@(adj.4)打開的;空曠的;未定的;營業的;公開的
+orange@(adj.6)橙色的
+other@(adj.5)其他的
+out@(adj.3)在外的
+"outside@(adj.7)外邊的,外部的"
+own@(adj.3)自己的
+past@(adj.4)過去的
+poor@(adj.4)貧窮的
+possible@(adj.8)可能的
+pretty@(adj.6)漂亮的
+public@(adj.6)公開的;公立的
+purple@(adj.6)紫色的
+quick@(adj.5)快的
+quiet@(adj.5)安靜的
+ready@(adj.5)準備好的
+real@(adj.4)真實的
+red@(adj.3)紅色的
+rich@(adj.4)富有的
+right@(adj.5)右邊;對的
+round@(adj.5)圓形的
+sad@(adj.3)難過的
+safe@(adj.4)安全的
+"salt@(adj.4)鹹水的;含鹽的;(故事,笑話等)猥褻的"
+same@(adj.4)相同的
+"second@(adj.6)第二的;次要的,副的,從屬的"
+selfish@(adj.7)自私的
+seven@(adj.5)七的
+seventeen@(adj.9)十七的
+seventy@(adj.7)七十的
+several@(adj.7)幾個的
+sharp@(adj.5)尖銳的;敏銳的
+short@(adj.5)矮的;短的
+shy@(adj.3)害羞的
+sick@(adj.4)生病的
+silly@(adj.5)傻的;無聊的
+silver@(adj.6)銀的;銀白的
+simple@(adj.6)簡單的
+six@(adj.3)六的
+sixteen@(adj.7)十六的
+sixty@(adj.5)六十的
+slow@(adj.4)緩慢的
+small@(adj.5)小的
+smart@(adj.5)聰明的
+soft@(adj.4)柔軟的
+some@(adj.4)一些的
+sorry@(adj.5)抱歉;遺憾的
+"sound@(adj.5)完好的;堅固的;合理的,明智的;殷實的"
+sour@(adj.4)酸的
+south@(adj.5)南方的
+special@(adj.7)特別的
+still@(adj.5)靜止的
+strange@(adj.7)奇怪的
+strong@(adj.6)強壯的
+stupid@(adj.6)笨的
+such@(adj.4)如此的
+super@(adj.5)超級的
+sure@(adj.4)確定
+sweet@(adj.5)甜的
+tall@(adj.4)高的
+ten@(adj.3)十的
+that@(adj.4)那;那個
+then@(adj.4)當時的
+these@(adj.5)這些 (this 的複數)
+third@(adj.5)第三
+thirteen@(adj.8)十三的
+thirty@(adj.6)三十的
+this@(adj.4)這
+those@(adj.5)那些的;那
+thousand@(adj.8)千的
+three@(adj.5)三的
+tiny@(adj.4)微小的
+top@(adj.3)最高的
+total@(adj.5)總的
+true@(adj.4)真實的;正確的
+twelve@(adj.6)十二的
+twenty@(adj.6)二十的
+two@(adj.3)二的
+up@(adj.2)向上的;上行的
+upstairs@(adj.8)樓上的
+useful@(adj.6)有用的
+warm@(adj.4)溫暖的
+weak@(adj.4)虛弱的
+welcome@(adj.7)受歡迎的;令人愉快的;被允許的
+well@(adj.4)健康的
+west@(adj.4)西方的
+"what@(adj.4)什麼;多麼,何等"
+"which@(adj.5)哪一個,哪一些;這個,這些"
+white@(adj.5)白色的
+whole@(adj.5)完整的
+"wide@(adj.4)寬的,廣泛的"
+"worse@(adj.5)更壞的,更差的"
+worst@(adj.5)最壞的;最差的
+wrong@(adj.5)錯誤的
+yellow@(adj.6)黃色的
+young@(adj.5)年輕的
+yucky@(adj.5)討人厭的;噁心的
+yummy@(adj.5)好吃的
+act@(v.3)扮演
+add@(v.3)添加
+address@(v.7)寫上收件人姓名地址;向...致詞
+age@(v.3)使變老;使(酒之)味道變醇;使成熟
+agree@(v.5)同意
+allow@(v.5)允許
+"am@(v.2)是,在; be 動詞第一人稱,單數,現在式"
+answer@(v.6)回答
+ape@(v.3)模仿
+appear@(v.6)出現
+"are@(v.3)是,在; be 動詞第一、第三人稱, 複數, 現在式; 第二次人單、複數, 現在式"
+ask@(v.3)問
+back@(v.4)向後;追溯;回覆;贊助
+ball@(v.4)使成球形; 呈球狀
+balloon@(v.7)像氣球般鼓起(或膨脹);乘氣球上升;激增
+bank@(v.4)存(款)於銀行;築堤防護;堆積
+bar@(v.3)閂住;阻攔;禁止
+base@(v.4)以...為基地
+bat@(v.3)揮打;眨(眼)
+bathe@(v.5)洗澡
+be@(v.2)是;要;有;在
+beach@(v.5)將(船等)拖上岸
+beat@(v.4)擊敗;敲擊
+become@(v.6)變成
+begin@(v.5)開始
+believe@(v.7)相信
+belong@(v.6)屬於
+best@(v.4)打敗;勝過
+better@(v.6)改善;提高;超過;變得較好
+bite@(v.4)咬
+block@(v.5)阻塞
+blow@(v.4)吹
+book@(v.4)預訂;預雇;預約;登記
+"bottom@(v.6)基於,根據;到達底部;降至最低點"
+box@(v.3)把...裝箱(或盒等)
+break@(v.5)斷裂;中斷;打破（記錄）
+breakfast@(v.9)吃早餐; 為...供應早餐
+bridge@(v.6)架橋於;把...連結(或彌合)起來
+bring@(v.5)帶來
+brown@(v.5)變成褐色(或棕色)
+bug@(v.3)在...安裝竊聽器;煩擾;激怒
+build@(v.5)建造;蓋
+bus@(v.3)用公車運送
+busy@(v.4)使忙於
+butter@(v.6)塗奶油於;以花言巧語討好
+buy@(v.3)買
+cage@(v.4)把...關進籠子;把...囚禁起來
+call@(v.4)喊;打電話
+camp@(v.4)露營
+"can@(v.3)能,會;可能;可以;必須"
+cap@(v.3)給...戴帽;加蓋於
+care@(v.4)關心;照顧
+carry@(v.5)提;搬運
+case@(v.4)把...裝入箱(或容器)中
+catch@(v.5)接(球);捕獲
+"cause@(v.5)導致,使發生,引起"
+center@(v.6)集中;居中
+chair@(v.5)主持(會議);任(會議的)主席
+chance@(v.6)冒...的險;賭(錢); 碰巧
+chart@(v.5)繪製...的圖表;詳細計劃
+chase@(v.5)追
+check@(v.5)檢查
+class@(v.5)把...分類;把...分等級
+clean@(v.5)打掃
+clear@(v.5)使乾淨;收拾;交換票據
+climb@(v.5)爬;攀登
+close@(v.5)關上
+cloud@(v.5)陰雲密佈;變暗;變模糊;變混濁
+coat@(v.4)塗在...上;給...穿上外套
+color@(v.5)著色;渲染;文飾;歪曲;影響
+come@(v.4)到來
+continue@(v.8)繼續
+cook@(v.4)煮
+cool@(v.4)使涼快;使冷卻
+correct@(v.7)改正;糾正
+cost@(v.4)花費
+count@(v.5)計算;數
+course@(v.6)(用獵犬)追獵;追逐
+cover@(v.5)蓋住
+cry@(v.3)哭叫
+cup@(v.3)使(手掌)成杯狀;把...放入杯內
+cut@(v.3)切割;剪
+dance@(v.5)跳舞
+darken@(v.6)使變暗;變黑
+date@(v.4)約會
+"deal@(v.4)處理;對付;對待[(+with)]"
+decide@(v.6)決定
+die@(v.3)死
+dig@(v.3)挖掘
+direct@(v.6)指引
+dirty@(v.5)弄髒; 變髒
+discover@(v.8)發現
+dish@(v.4)盛...於盤中
+do@(v.2)做
+down@(v.4)擊倒
+draw@(v.4)畫;繪製;描寫
+dream@(v.5)做(夢);想像
+drink@(v.5)喝
+drive@(v.5)開車
+dry@(v.3)曬乾;風乾
+duck@(v.4)躲避;迴避
+ease@(v.4)減輕
+eat@(v.3)吃
+edge@(v.4)使鋒利;使漸進
+end@(v.3)結束
+enter@(v.5)輸入;進入
+equal@(v.5)等於
+even@(v.4)使平坦;弄平;使相等
+examine@(v.7)檢查;測驗
+except@(v.6)把...除外;反對
+eye@(v.3)看;注視;審視
+face@(v.4)面向;正對;正視;朝;向
+fall@(v.4)掉下
+fan@(v.3)扇;煽動;激起
+farm@(v.4)耕作;養殖;經營農場;從事畜牧業
+father@(v.6)做...的父親; 創始;創立
+fear@(v.4)畏懼
+feed@(v.4)吃;餵養
+feel@(v.4)感覺
+fight@(v.5)打架;作戰
+fill@(v.4)充滿;填充
+find@(v.4)找到
+fine@(v.4)使純;澄清;使精細
+finger@(v.6)撥弄;指出;告密;告發
+finish@(v.6)完成
+"fire@(v.4)解雇,開除;點燃; 開火;射擊"
+fish@(v.4)釣魚
+floor@(v.5)在...鋪設地板;使大為震驚
+"flower@(v.6)開花;發育,成熟;繁榮"
+fly@(v.3)飛
+fog@(v.3)以霧籠罩;使困惑;使模糊
+follow@(v.6)遵循;跟隨
+"foot@(v.4)支付(帳單或費用);合計為,總計"
+force@(v.5)強迫
+forget@(v.6)忘記
+"fork@(v.4)分歧,分叉"
+free@(v.4)使自由;解放;使解脫
+front@(v.5)向前;在前面;面對
+fruit@(v.5)結果實; 使結果實
+"garden@(v.6)從事園藝,在園中種植;"
+gas@(v.3)放出氣體;加油;空談;吹牛
+get@(v.3)得到;拿到
+give@(v.4)給
+go@(v.2)去;走
+gray@(v.4)使成灰色(或灰白)
+green@(v.5)使成為綠色
+grey@(v.4)使成灰色
+"ground@(v.6)使擱淺;使停飛;依靠,根據,基於"
+group@(v.5)把...分組(或歸類)
+grow@(v.4)種植;成長
+guess@(v.5)猜
+"guest@(v.5)款待,招待"
+guide@(v.5)引導
+gun@(v.3)用槍射擊
+"hand@(v.4)面交,給,傳遞"
+happen@(v.6)發生
+hate@(v.4)憎恨
+have@(v.4)有
+"head@(v.4)率領;出發,駛往"
+hear@(v.4)聽見
+heat@(v.4)把...加熱;使暖;使激動;刺激
+help@(v.4)幫忙
+hit@(v.3)打;擊
+hold@(v.4)拿著
+"hole@(v.4)鑿洞於,穿孔於;進入洞中"
+home@(v.4)回家;為...提供住處
+hope@(v.4)希望
+house@(v.5)給...房子住
+hurt@(v.4)傷害;使疼痛
+inch@(v.4)使緩慢地移動
+interest@(v.8)使發生興趣
+iron@(v.4)熨燙
+"is@(v.2)是,在; be 動詞第三人稱,單數,現在式"
+join@(v.4)加入
+joke@(v.4)開玩笑
+jump@(v.4)跳躍
+keep@(v.4)保留;保持
+key@(v.3)鎖上;插上;為...調音;用鍵盤輸入
+kick@(v.4)踢
+kid@(v.3)戲弄
+kill@(v.4)殺
+kiss@(v.4)親吻
+knee@(v.4)用膝蓋碰(撞)
+"knife@(v.5)(用刀)切;戮,刺"
+know@(v.4)知道
+lack@(v.4)缺乏
+lamb@(v.4)產羔羊
+land@(v.4)登陸
+last@(v.4)持續
+laugh@(v.5)笑
+lay@(v.3)置放;產卵
+lead@(v.4)引導
+leaf@(v.4)匆匆翻閱; 生葉片
+learn@(v.5)學習
+leave@(v.5)離開;丟下
+let@(v.3)讓
+lie@(v.3)說謊;躺
+lift@(v.4)舉起
+light@(v.5)點(火);點燃;照亮
+like@(v.4)喜歡
+line@(v.4)排隊
+list@(v.4)列成表
+listen@(v.6)傾聽
+live@(v.4)居住
+long@(v.4)長久地;始終; 渴望
+look@(v.4)看
+"love@(v.4)愛好,喜歡"
+lunch@(v.5)吃午餐
+machine@(v.7)用機器做
+mail@(v.4)寄信
+make@(v.4)製造; 使得
+man@(v.3)給...配置人員
+map@(v.3)繪製...的地圖;詳細計劃
+market@(v.6)(在市場上)銷售
+marry@(v.5)結婚
+master@(v.6)精通
+"matter@(v.6)有關係,要緊"
+mean@(v.4)意指
+meet@(v.4)遇見
+middle@(v.6)放在中間;對摺
+milk@(v.4)擠(奶);榨取;偷聽電訊
+mind@(v.4)介意
+miss@(v.4)想念;惦記;未達到
+"mistake@(v.7)弄錯,誤解;弄錯,搞錯"
+mother@(v.6)生下;產生出
+mouth@(v.5)誇大地說話
+move@(v.4)移動
+name@(v.4)給...取名;列舉
+"near@(v.4)近,接近;幾乎,差不多"
+neck@(v.4)摟著脖子親吻;變細;變狹窄
+need@(v.4)需要
+"nose@(v.4)探問,探著;引導;嗅,聞"
+note@(v.4)注意;記下
+notice@(v.6)注意到;通知
+"number@(v.6)編號,總數達到,共計"
+"nurse@(v.5)看護,護理;給...餵奶;培育;當奶媽"
+O.K.@(v.4)尚可;挺好;批准
+oil@(v.3)給...加潤滑油;賄賂
+OK@(v.2)尚可;挺好;批准
+"okay@(v.4)對,很好地;批准,認可"
+open@(v.4)打開
+order@(v.5)點菜;訂購
+out@(v.3)出現;問世;顯露
+own@(v.3)擁有
+paint@(v.5)畫圖;油漆
+"pair@(v.4)成對,配對"
+"paper@(v.5)用紙包;掩蓋,粉飾"
+park@(v.4)停放車輛; 放置
+"part@(v.4)使分開,使分離;斷裂;告別"
+party@(v.5)開派對;參加派對
+pass@(v.4)及格;經過;超過;傳遞
+pay@(v.3)付錢
+pen@(v.3)寫;寫作;囚禁
+"pencil@(v.6)草擬,起草"
+"people@(v.6)使人住在,居住於"
+pet@(v.3)把...當作寵兒;寵愛;撫弄;生氣
+"picture@(v.7)畫,拍攝;描述"
+piece@(v.5)拼湊;拼合;修理;修補
+pig@(v.3)生小豬;像豬一樣過活
+"place@(v.5)放置,安置;任命"
+plan@(v.4)計劃
+plant@(v.5)栽種;播種
+play@(v.4)玩
+please@(v.6)請;取悅
+pocket@(v.6)侵吞;擊(球)落袋;忍受
+point@(v.5)瞄準;指出;強調;對準
+"police@(v.6)管理,監督"
+"pool@(v.4)合辦,聯營"
+position@(v.8)把...放在適當位置
+power@(v.5)給...提供動力; 快速前進
+practice@(v.8)練習;訓練
+prepare@(v.7)準備
+price@(v.5)給...定價
+print@(v.5)印刷;用印刷體寫
+"prove@(v.5)證明,證實"
+pull@(v.4)拉
+push@(v.4)推開
+put@(v.3)放置
+question@(v.8)詢問
+"quiet@(v.5)使安靜;撫慰,安慰"
+race@(v.4)與...賽跑
+radio@(v.5)用無線電傳送
+rain@(v.4)下雨
+raise@(v.5)舉起;提高
+reach@(v.5)到;伸出
+read@(v.4)閱讀
+"ready@(v.5)預先,事先;使準備好"
+"reason@(v.6)推論,推理"
+receive@(v.7)收到
+remember@(v.8)記得
+report@(v.6)報告;報導
+rest@(v.4)休息
+return@(v.6)回;還
+ride@(v.4)騎;乘
+"ring@(v.4)(鐘,鈴等)鳴,響"
+rise@(v.4)起身;升起
+roll@(v.4)捲;滾
+"roof@(v.4)給...蓋屋頂,覆蓋"
+room@(v.4)居住; 為...提供住處
+root@(v.4)使生根;使紮根
+"rope@(v.4)捆,紮,縛,綁"
+"round@(v.5)變圓;發胖;兜圈子,環行"
+row@(v.3)划船
+rub@(v.3)磨擦
+rule@(v.4)統治;裁決
+run@(v.3)跑
+sail@(v.4)航行
+salt@(v.4)給...加鹽;用鹽醃
+sand@(v.4)磨光;以沙堵塞
+save@(v.4)救;省;存錢
+saw@(v.3)鋸;鋸開
+say@(v.3)說
+"scare@(v.5)驚嚇,使恐懼"
+"school@(v.6)教育,訓練"
+seat@(v.4)使就座
+see@(v.3)看見
+"seed@(v.4)(植物)結實,結子;播種"
+seem@(v.4)似乎是
+seesaw@(v.6)玩蹺蹺板;上下(來回)搖動
+sell@(v.4)賣
+send@(v.4)寄發;送
+"sense@(v.5)意識到;了解,領會"
+sentence@(v.8)宣判;判決
+serve@(v.5)服務
+"service@(v.7)維修,保養"
+set@(v.3)安放;沒入
+shake@(v.5)搖動;握(手)
+"shape@(v.5)使成形;塑造,製作"
+shine@(v.5)照耀
+"ship@(v.4)用船運;郵寄;解雇;上船,乘船"
+shop@(v.4)購物
+"shoulder@(v.8)肩起,挑起;擔負,承擔"
+shout@(v.5)呼叫
+show@(v.4)表演;顯示
+shut@(v.4)關閉
+"sight@(v.5)看見,發現;瞄準;察看"
+sing@(v.4)唱歌
+sit@(v.3)坐
+size@(v.4)按一定尺寸製作;估算
+skin@(v.4)植皮;癒合;脫皮
+sleep@(v.5)睡覺
+"slow@(v.4)使慢,放慢"
+smell@(v.5)聞
+smile@(v.5)微笑
+smoke@(v.5)抽煙;冒煙
+snake@(v.5)蛇行
+snow@(v.4)下雪
+soap@(v.4)用肥皂擦洗;向...灌迷魂湯
+soil@(v.4)弄髒
+sound@(v.5)聽起來
+sour@(v.4)使變酸;厭煩;變壞
+space@(v.5)隔開
+speak@(v.5)說;講
+spell@(v.5)拼字
+spend@(v.5)花費(錢或時間)
+spoon@(v.5)用匙舀;舀取
+"sport@(v.5)炫耀;誇示;遊戲,;開玩笑,嘲弄;突變"
+stand@(v.5)站住; 堅持; 面對; 承擔...任務
+star@(v.4)主演;表現出色
+start@(v.5)開始
+state@(v.5)陳述
+"station@(v.7)駐紮,部署,配置"
+stay@(v.4)停留
+step@(v.4)跨(步);踏(腳)
+stone@(v.5)用石頭鋪;用...
+`;
+
+    // --- PARSING LOGIC ---
+    let appData = [];
+    
+    function parseData() {
+        const lines = rawDataString.split('\n');
+        lines.forEach(line => {
+            line = line.trim();
+            // Remove surrounding quotes if they exist (CSV artifact)
+            if (line.startsWith('"') && line.endsWith('"')) {
+                line = line.slice(1, -1);
+            }
+            if (!line) return;
+            
+            // Format: word@(pos.length)definition
+            // Regex to find word, pos, length, and definition
+            // Matches: word @ ( pos . length ) def
+            const match = line.match(/^(.+?)@\((.+?)\.(\d+)\)(.+)$/);
+            
+            if (match) {
+                appData.push({
+                    word: match[1].trim(),
+                    pos: match[2].trim(), // Part of speech
+                    length: parseInt(match[3]),
+                    def: match[4].trim()
+                });
+            } else {
+                // Console log for debugging malformed lines
+                // console.log('Skipped line:', line);
+            }
+        });
+        
+        // Sort alphabetically by default
+        appData.sort((a, b) => a.word.localeCompare(b.word));
+    }
+
+    // --- APP STATE ---
+    let currentMode = 'spell';
+    let currentGameData = [];
+    let currentIndex = 0;
+    const itemsPerPage = 12;
+    
+    // Spell Mode State
+    let spellPages = [];
+    let currentSpellPage = 0;
+
+    // Match Mode State
+    let matchPairs = [];
+    let selectedCard = null;
+    let matchedCount = 0;
+    let isProcessing = false;
+
+    // --- INITIALIZATION ---
+    window.onload = function() {
+        parseData();
+        generateCategoryGrid();
+        renderStudyList();
+        
+        // Input Search Listener for Study Mode
+        document.getElementById('study-search').addEventListener('input', (e) => {
+            renderStudyList(e.target.value);
+        });
+    };
+
+    // --- NAVIGATION & VIEWS ---
+    function setMode(mode, el) {
+        currentMode = mode;
+        document.querySelectorAll('.toggle-opt').forEach(d => d.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + viewId).classList.add('active');
+    }
+
+    function goHome() {
+        switchView('dashboard');
+    }
+
+    function showStudyMode() {
+        switchView('study');
+        renderStudyList();
+    }
+
+    // --- DASHBOARD LOGIC ---
+    function generateCategoryGrid() {
+        const grid = document.getElementById('category-grid');
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        
+        alphabet.forEach(letter => {
+            const btn = document.createElement('div');
+            btn.className = 'cat-btn';
+            btn.innerText = letter;
+            btn.onclick = () => startGame(letter);
+            grid.appendChild(btn);
+        });
+    }
+
+    function getFilteredData(filterChar) {
+        const lengthFilter = document.getElementById('length-filter').value;
+        
+        return appData.filter(item => {
+            // Filter by Letter (if provided)
+            const matchLetter = filterChar ? item.word.toUpperCase().startsWith(filterChar) : true;
+            
+            // Filter by Length
+            let matchLength = true;
+            if (lengthFilter !== 'all') {
+                if (lengthFilter === '7') {
+                    matchLength = item.length >= 7;
+                } else {
+                    matchLength = item.length == parseInt(lengthFilter);
+                }
+            }
+            
+            return matchLetter && matchLength;
+        });
+    }
+
+    function startRandomGame() {
+        startGame(null, true);
+    }
+
+    function startGame(filterChar, isRandom = false) {
+        let data = isRandom ? [...appData] : getFilteredData(filterChar);
+        
+        if (isRandom) {
+            // Filter by length even in random mode
+            const lengthFilter = document.getElementById('length-filter').value;
+            if (lengthFilter !== 'all') {
+                 data = data.filter(item => {
+                    if (lengthFilter === '7') return item.length >= 7;
+                    return item.length == parseInt(lengthFilter);
+                 });
+            }
+            // Shuffle
+            data.sort(() => Math.random() - 0.5);
+            // Limit random mode to 20 items to keep it manageable
+            data = data.slice(0, 20); 
+        }
+
+        if (data.length === 0) {
+            alert("No words found for this category/length combination.");
+            return;
+        }
+
+        currentGameData = data;
+        
+        if (currentMode === 'spell') {
+            setupSpellingGame();
+        } else {
+            setupMatchingGame();
+        }
+    }
+
+    // --- SPELLING GAME ---
+    function setupSpellingGame() {
+        // Chunk data into pages
+        spellPages = [];
+        for (let i = 0; i < currentGameData.length; i += itemsPerPage) {
+            spellPages.push(currentGameData.slice(i, i + itemsPerPage));
+        }
+        currentSpellPage = 0;
+        renderSpellPage();
+        switchView('spell');
+    }
+
+    function renderSpellPage() {
+        const container = document.getElementById('spell-container');
+        container.innerHTML = '';
+        
+        const items = spellPages[currentSpellPage];
+        document.getElementById('spell-progress').innerText = `Page ${currentSpellPage + 1}/${spellPages.length}`;
+
+        items.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'spell-card';
+            
+            card.innerHTML = `
+                <div class="question-text">${item.def}</div>
+                <div class="input-group">
+                    <input type="text" class="spell-input" 
+                        id="inp-${idx}" 
+                        data-answer="${item.word}" 
+                        placeholder="Type answer..." 
+                        autocomplete="off">
+                    <div class="hint-btn" onclick="showHint('inp-${idx}', '${item.word}')">?</div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Toggle buttons
+        document.getElementById('prev-btn').style.visibility = currentSpellPage > 0 ? 'visible' : 'hidden';
+        document.getElementById('next-btn').style.visibility = currentSpellPage < spellPages.length - 1 ? 'visible' : 'hidden';
+    }
+
+    function checkSpelling() {
+        const inputs = document.querySelectorAll('.spell-input');
+        inputs.forEach(inp => {
+            const userVal = inp.value.trim().toLowerCase();
+            const correctVal = inp.dataset.answer.toLowerCase();
+            
+            // Smart matching
+            let isValid = false;
+            if (userVal === correctVal) isValid = true;
+            
+            if (!isValid && correctVal.includes('(')) {
+                const mainWord = correctVal.replace(/\(.*\)/, '').trim();
+                const altWord = correctVal.match(/\((.*)\)/)?.[1]?.trim();
+                if (userVal === mainWord || userVal === altWord) isValid = true;
+            }
+
+            if (isValid) {
+                inp.classList.remove('wrong');
+                inp.classList.add('correct');
+            } else {
+                inp.classList.remove('correct');
+                inp.classList.add('wrong');
+            }
+        });
+    }
+
+    function showHint(inputId, answer) {
+        const inp = document.getElementById(inputId);
+        inp.value = answer; 
+        inp.focus();
+    }
+
+    function changePage(dir) {
+        currentSpellPage += dir;
+        renderSpellPage();
+        document.getElementById('view-spell').scrollTop = 0;
+    }
+
+    // --- MATCHING GAME ---
+    function setupMatchingGame() {
+        currentIndex = 0;
+        matchedCount = 0;
+        startMatchingRound();
+        switchView('match');
+    }
+
+    function startMatchingRound() {
+        const roundData = currentGameData.slice(currentIndex, currentIndex + 5);
+        if (roundData.length === 0) {
+            alert("Game Over! Good job.");
+            goHome();
+            return;
+        }
+
+        currentIndex += 5;
+        matchedCount = 0;
+        document.getElementById('match-next-btn').classList.add('hidden');
+        document.getElementById('match-score').innerText = `Pairs: 0/${roundData.length}`;
+
+        let cards = [];
+        roundData.forEach(item => {
+            cards.push({ id: item.word, text: item.word, type: 'word', pair: item.word });
+            cards.push({ id: item.word + '_def', text: item.def, type: 'def', pair: item.word });
+        });
+
+        cards.sort(() => Math.random() - 0.5);
+
+        const grid = document.getElementById('match-area');
+        grid.innerHTML = '';
+
+        cards.forEach(card => {
+            const el = document.createElement('div');
+            el.className = 'match-card';
+            el.innerText = card.text;
+            el.dataset.pair = card.pair;
+            el.onclick = () => handleCardTap(el);
+            grid.appendChild(el);
+        });
+    }
+
+    function handleCardTap(el) {
+        if (isProcessing || el.classList.contains('matched') || el.classList.contains('selected')) return;
+
+        el.classList.add('selected');
+
+        if (!selectedCard) {
+            selectedCard = el;
+        } else {
+            const card1 = selectedCard;
+            const card2 = el;
+            selectedCard = null;
+            isProcessing = true;
+
+            if (card1.dataset.pair === card2.dataset.pair) {
+                setTimeout(() => {
+                    card1.classList.remove('selected');
+                    card2.classList.remove('selected');
+                    card1.classList.add('matched');
+                    card2.classList.add('matched');
+                    isProcessing = false;
+                    matchedCount++;
+                    document.getElementById('match-score').innerText = `Pairs: ${matchedCount}`;
+                    
+                    const remaining = document.querySelectorAll('.match-card:not(.matched)');
+                    if (remaining.length === 0) {
+                        document.getElementById('match-next-btn').classList.remove('hidden');
+                    }
+                }, 300);
+            } else {
+                setTimeout(() => {
+                    card1.classList.add('error');
+                    card2.classList.add('error');
+                }, 200);
+
+                setTimeout(() => {
+                    card1.classList.remove('selected', 'error');
+                    card2.classList.remove('selected', 'error');
+                    isProcessing = false;
+                }, 800);
+            }
+        }
+    }
+
+    // --- STUDY LIST LOGIC ---
+    function renderStudyList(searchTerm = '') {
+        const list = document.getElementById('study-list');
+        list.innerHTML = '';
+        
+        const term = searchTerm.toLowerCase();
+        const filtered = appData.filter(item => 
+            item.word.toLowerCase().includes(term) || 
+            item.def.includes(term)
+        );
+
+        const displayData = term ? filtered : filtered.slice(0, 100);
+
+        displayData.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'study-item';
+            li.innerHTML = `
+                <span class="study-word">${item.word}</span>
+                <div class="study-meta">
+                    <span class="study-pos">${item.pos}</span>
+                    <span class="study-def">${item.def}</span>
+                </div>
+            `;
+            list.appendChild(li);
+        });
+
+        if (!term && filtered.length > 100) {
+            const more = document.createElement('li');
+            more.style.textAlign = 'center';
+            more.style.padding = '10px';
+            more.style.color = '#888';
+            more.innerText = `...and ${filtered.length - 100} more items. Type to search.`;
+            list.appendChild(more);
+        }
+    }
+
+</script>
+</body>
+</html>
