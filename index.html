@@ -12,8 +12,8 @@
             --bg: #f5f7fa;
             --card: #ffffff;
             --text: #2c3e50;
-            --radius: 12px;
-            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 8px;
+            --shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,23 +32,24 @@
         /* Header & Nav */
         header {
             background: var(--card);
-            padding: 1rem;
+            padding: 0.8rem 1rem;
             box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 10;
+            flex-shrink: 0;
         }
 
-        h1 { margin: 0; font-size: 1.2rem; color: var(--primary); }
+        h1 { margin: 0; font-size: 1.1rem; color: var(--primary); }
 
         .btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: opacity 0.2s;
             display: inline-flex;
@@ -56,7 +57,7 @@
             justify-content: center;
         }
         .btn:active { opacity: 0.7; }
-        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
         .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
         .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
@@ -66,8 +67,8 @@
             display: none;
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
-            max-width: 600px;
+            padding: 10px;
+            max-width: 800px; /* Slightly wider for 2 columns */
             width: 100%;
             margin: 0 auto;
         }
@@ -76,102 +77,123 @@
         /* Dashboard */
         .controls {
             background: var(--card);
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .toggle-group {
             display: flex;
             background: #e1e4e8;
-            border-radius: 8px;
-            padding: 4px;
-            margin-bottom: 1rem;
+            border-radius: 6px;
+            padding: 3px;
+            margin-bottom: 0.8rem;
         }
         .toggle-opt {
             flex: 1;
             text-align: center;
-            padding: 8px;
-            border-radius: 6px;
+            padding: 6px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.9rem;
         }
-        .toggle-opt.selected { background: white; color: var(--primary); shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .toggle-opt.selected { background: white; color: var(--primary); shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
-        .filter-group {
-            margin-bottom: 1rem;
-        }
-        .filter-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .filter-group { margin-bottom: 0.8rem; }
+        .filter-group label { display: block; margin-bottom: 0.4rem; font-weight: bold; font-size: 0.9rem; }
         select {
             width: 100%;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             border: 1px solid #ddd;
-            font-size: 1rem;
+            font-size: 0.95rem;
             background: white;
         }
 
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
         }
         .cat-btn {
             aspect-ratio: 1;
             background: var(--card);
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             cursor: pointer;
-            box-shadow: 0 2px 0 #eee;
+            box-shadow: 0 1px 0 #eee;
         }
-        .cat-btn:active { transform: translateY(2px); box-shadow: none; }
+        .cat-btn:active { transform: translateY(1px); box-shadow: none; }
         
         .big-btn {
             width: 100%;
-            padding: 1rem;
-            font-size: 1.1rem;
-            margin-top: 1rem;
+            padding: 0.8rem;
+            font-size: 1rem;
+            margin-top: 0.8rem;
             background: var(--success);
         }
 
-        /* Study Mode */
-        .study-list { list-style: none; padding: 0; }
+        /* Study Mode - COMPACT 2 COLUMN LAYOUT */
+        .study-list { 
+            list-style: none; 
+            padding: 0; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2 Columns */
+            gap: 8px;
+        }
         .study-item {
             background: var(--card);
-            padding: 1rem;
-            margin-bottom: 0.8rem;
+            padding: 8px;
             border-radius: var(--radius);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column; /* Stack word/def vertically in narrow columns */
+            justify-content: center;
+            border: 1px solid #eee;
         }
-        .study-word { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
-        .study-meta { text-align: right; max-width: 65%; }
-        .study-pos { font-size: 0.8rem; color: #888; display: block; margin-bottom: 4px; font-style: italic; }
-        .study-def { color: #444; font-size: 0.95rem; }
+        .study-word { 
+            font-weight: bold; 
+            color: var(--primary); 
+            font-size: 0.95rem; /* Smaller font */
+            margin-bottom: 2px;
+            white-space: nowrap; /* Don't break words */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .study-meta { 
+            font-size: 0.8rem; 
+            color: #555; 
+            line-height: 1.2;
+        }
+        .study-pos { 
+            font-size: 0.7rem; 
+            color: #999; 
+            font-style: italic; 
+            margin-right: 4px;
+        }
 
         /* Game Mode A: Spelling */
         .spell-card {
             background: var(--card);
-            padding: 2rem;
+            padding: 1.5rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             text-align: center;
             margin-bottom: 1rem;
         }
-        .question-text { font-size: 1.2rem; margin-bottom: 1.5rem; color: #444; min-height: 3rem; }
-        .input-group { position: relative; margin-bottom: 1.5rem; }
+        .question-text { font-size: 1.1rem; margin-bottom: 1rem; color: #444; min-height: 2.5rem; }
+        .input-group { position: relative; margin-bottom: 1rem; }
         .spell-input {
             width: 100%;
-            padding: 12px;
-            font-size: 1.2rem;
+            padding: 10px;
+            font-size: 1.1rem;
             border: 2px solid #ddd;
             border-radius: 8px;
             text-align: center;
@@ -186,8 +208,8 @@
             top: 50%;
             transform: translateY(-50%);
             background: #f1c40f;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -195,32 +217,32 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
 
         .pagination {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
 
         /* Game Mode B: Matching */
         .match-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
             padding-bottom: 2rem;
         }
         .match-card {
             background: var(--card);
-            padding: 1.5rem 0.5rem;
+            padding: 1rem 0.4rem;
             border-radius: var(--radius);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             cursor: pointer;
-            min-height: 80px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -240,7 +262,7 @@
 
         /* Utilities */
         .hidden { display: none !important; }
-        .stats { font-size: 0.9rem; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .stats { font-size: 0.85rem; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         
     </style>
 </head>
@@ -248,7 +270,7 @@
 
     <header>
         <h1 id="app-title">VocabMaster HS</h1>
-        <button class="btn btn-outline btn-sm" onclick="showStudyMode()">📖 Study</button>
+        <button class="btn btn-outline btn-sm" onclick="showStudyMode()">📖 List</button>
     </header>
 
     <div id="view-dashboard" class="view active">
@@ -281,12 +303,12 @@
     <div id="view-spell" class="view">
         <div class="stats">
             <span id="spell-progress">Page 1/5</span>
-            <button class="btn btn-sm" onclick="goHome()">Home</button>
+            <button class="btn btn-sm" onclick="goHome()">Back</button>
         </div>
         <div id="spell-container"></div>
         <div class="pagination">
-            <button class="btn btn-outline" id="prev-btn" onclick="changePage(-1)">Previous</button>
-            <button class="btn btn-success" id="check-btn" onclick="checkSpelling()">Check Answers</button>
+            <button class="btn btn-outline" id="prev-btn" onclick="changePage(-1)">Prev</button>
+            <button class="btn btn-success" id="check-btn" onclick="checkSpelling()">Check</button>
             <button class="btn btn-outline" id="next-btn" onclick="changePage(1)">Next</button>
         </div>
     </div>
@@ -294,15 +316,15 @@
     <div id="view-match" class="view">
         <div class="stats">
             <span id="match-score">Pairs: 0/5</span>
-            <button class="btn btn-sm" onclick="goHome()">Home</button>
+            <button class="btn btn-sm" onclick="goHome()">Back</button>
         </div>
         <div id="match-area" class="match-grid"></div>
         <button class="btn big-btn hidden" id="match-next-btn" onclick="startMatchingRound()">Next Round</button>
     </div>
 
     <div id="view-study" class="view">
-        <div class="stats">
-            <input type="text" id="study-search" placeholder="Search words..." style="width:70%; padding:8px; border-radius:6px; border:1px solid #ccc;">
+        <div class="stats" style="margin-bottom: 12px;">
+            <input type="text" id="study-search" placeholder="Search..." style="flex:1; margin-right:8px; padding:6px; border-radius:6px; border:1px solid #ccc; font-size: 0.9rem;">
             <button class="btn btn-sm" onclick="goHome()">Close</button>
         </div>
         <ul id="study-list" class="study-list"></ul>
@@ -938,8 +960,6 @@ stone@(v.5)用石頭鋪;用...
             if (!line) return;
             
             // Format: word@(pos.length)definition
-            // Regex to find word, pos, length, and definition
-            // Matches: word @ ( pos . length ) def
             const match = line.match(/^(.+?)@\((.+?)\.(\d+)\)(.+)$/);
             
             if (match) {
@@ -949,14 +969,11 @@ stone@(v.5)用石頭鋪;用...
                     length: parseInt(match[3]),
                     def: match[4].trim()
                 });
-            } else {
-                // Console log for debugging malformed lines
-                // console.log('Skipped line:', line);
             }
         });
         
-        // Sort alphabetically by default
-        appData.sort((a, b) => a.word.localeCompare(b.word));
+        // Ensure A-Z Sort
+        appData.sort((a, b) => a.word.toLowerCase().localeCompare(b.word.toLowerCase()));
     }
 
     // --- APP STATE ---
@@ -1051,7 +1068,6 @@ stone@(v.5)用石頭鋪;用...
         let data = isRandom ? [...appData] : getFilteredData(filterChar);
         
         if (isRandom) {
-            // Filter by length even in random mode
             const lengthFilter = document.getElementById('length-filter').value;
             if (lengthFilter !== 'all') {
                  data = data.filter(item => {
@@ -1059,9 +1075,7 @@ stone@(v.5)用石頭鋪;用...
                     return item.length == parseInt(lengthFilter);
                  });
             }
-            // Shuffle
             data.sort(() => Math.random() - 0.5);
-            // Limit random mode to 20 items to keep it manageable
             data = data.slice(0, 20); 
         }
 
@@ -1081,7 +1095,6 @@ stone@(v.5)用石頭鋪;用...
 
     // --- SPELLING GAME ---
     function setupSpellingGame() {
-        // Chunk data into pages
         spellPages = [];
         for (let i = 0; i < currentGameData.length; i += itemsPerPage) {
             spellPages.push(currentGameData.slice(i, i + itemsPerPage));
@@ -1116,7 +1129,6 @@ stone@(v.5)用石頭鋪;用...
             container.appendChild(card);
         });
 
-        // Toggle buttons
         document.getElementById('prev-btn').style.visibility = currentSpellPage > 0 ? 'visible' : 'hidden';
         document.getElementById('next-btn').style.visibility = currentSpellPage < spellPages.length - 1 ? 'visible' : 'hidden';
     }
@@ -1127,7 +1139,6 @@ stone@(v.5)用石頭鋪;用...
             const userVal = inp.value.trim().toLowerCase();
             const correctVal = inp.dataset.answer.toLowerCase();
             
-            // Smart matching
             let isValid = false;
             if (userVal === correctVal) isValid = true;
             
@@ -1250,32 +1261,36 @@ stone@(v.5)用石頭鋪;用...
         list.innerHTML = '';
         
         const term = searchTerm.toLowerCase();
+        // The data is already sorted A-Z in parseData()
         const filtered = appData.filter(item => 
             item.word.toLowerCase().includes(term) || 
             item.def.includes(term)
         );
 
-        const displayData = term ? filtered : filtered.slice(0, 100);
+        // If searching, show all matches. If not, limit to 200 to prevent lagging on huge lists.
+        const displayData = term ? filtered : filtered.slice(0, 200);
 
         displayData.forEach(item => {
             const li = document.createElement('li');
             li.className = 'study-item';
+            // Simple structure for the grid card
             li.innerHTML = `
-                <span class="study-word">${item.word}</span>
+                <div class="study-word">${item.word}</div>
                 <div class="study-meta">
-                    <span class="study-pos">${item.pos}</span>
-                    <span class="study-def">${item.def}</span>
+                    <span class="study-pos">${item.pos}</span>${item.def}
                 </div>
             `;
             list.appendChild(li);
         });
 
-        if (!term && filtered.length > 100) {
-            const more = document.createElement('li');
+        if (!term && filtered.length > 200) {
+            const more = document.createElement('div');
+            more.style.gridColumn = '1 / -1';
             more.style.textAlign = 'center';
             more.style.padding = '10px';
             more.style.color = '#888';
-            more.innerText = `...and ${filtered.length - 100} more items. Type to search.`;
+            more.style.fontSize = '0.8rem';
+            more.innerText = `...and ${filtered.length - 200} more items. Use search to find specific words.`;
             list.appendChild(more);
         }
     }
